@@ -20,6 +20,7 @@ LOW_BATTERY=${LOW_BATTERY:-15}
 num_refresh=$FULL_DISPLAY_REFRESH_RATE   # el primer dibujo siempre es completo
 
 log() { echo "$(date '+%F %T') $*"; }
+trap '' HUP
 
 # Mantener el log chico (últimas 300 líneas).
 [ -f "$LOG" ] && tail -n 300 "$LOG" >"$LOG.tmp" && cat "$LOG.tmp" >"$LOG" && rm -f "$LOG.tmp"
@@ -50,8 +51,10 @@ draw() {
 }
 
 refresh_dashboard() {
-  "$DIR/wait-for-wifi.sh" "$WIFI_TEST_IP"
-  if "$DIR/local/fetch-dashboard.sh" "$DASH_PNG"; then
+  log "Esperando Wi-Fi"
+  /bin/sh "$DIR/wait-for-wifi.sh" "$WIFI_TEST_IP"
+  log "Descargando"
+  if /bin/sh "$DIR/local/fetch-dashboard.sh" "$DASH_PNG"; then
     draw "$DASH_PNG"
     log "Pantalla actualizada (batería $(battery)%)"
   else
@@ -73,8 +76,11 @@ rtc_sleep() {
   echo mem >/sys/power/state
 }
 
-log "Iniciando ($WAKE_MINUTES min, $WAKE_FROM–$WAKE_TO h)"
+log "Iniciando (min $WAKE_MINUTES, de $WAKE_FROM a $WAKE_TO h, pid $$)"
+sleep 3   # deja que KUAL termine de cerrar su menú
+log "Apagando interfaz"
 stop_ui
+log "Interfaz apagada"
 echo powersave >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
 # Luz frontal: por powerd y, si no responde, directo al driver.
@@ -82,7 +88,8 @@ lipc-set-prop com.lab126.powerd flIntensity "${FRONTLIGHT:-0}" 2>/dev/null \
   || for bl in /sys/class/backlight/*/brightness; do echo "${FRONTLIGHT:-0}" >"$bl"; done
 
 while true; do
-  next=$("$DIR/next-wakeup.sh")
+  next=$(/bin/sh "$DIR/next-wakeup.sh")
+  log "Próximo despertar en ${next}s"
   if [ "$next" -gt "$SLEEP_SCREEN_INTERVAL" ]; then
     log "Modo noche"
     draw "$DIR/sleeping.png"
