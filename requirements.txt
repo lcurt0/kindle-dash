@@ -1,7 +1,22 @@
-playwright==1.48.0
-jinja2>=3.1
-pillow>=10
-pyyaml>=6
-requests>=2.31
-feedparser>=6.0
-pytest>=8
+# Versiones exactas (incluye dependencias indirectas). Dependabot propone
+# actualizaciones una vez por mes como PR revisable.
+certifi==2026.10.23
+charset-normalizer==3.5.2
+feedparser==6.0.14
+feedparser-sgmllib==2.1.0
+greenlet==3.5.6
+idna==3.20
+iniconfig==2.3.1
+Jinja2==3.1.6
+MarkupSafe==3.0.4
+packaging==26.3
+pillow==13.0.0
+playwright==1.64.1
+pluggy==1.7.0
+pyee==14.0.0
+Pygments==2.21.0
+pytest==9.2.0
+PyYAML==6.0.3
+requests==2.34.2
+typing_extensions==4.16.0
+urllib3==2.8.0

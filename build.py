@@ -70,11 +70,8 @@ def render_png(html_path: Path, png_path: Path, w: int, h: int) -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page(viewport={"width": w, "height": h}, device_scale_factor=1)
+        # Todo es local (fuentes del sistema, sin recursos externos).
         page.goto(html_path.resolve().as_uri(), wait_until="load")
-        try:
-            page.wait_for_load_state("networkidle", timeout=8000)
-        except Exception:  # sin red: sigue con las fuentes locales
-            pass
         page.evaluate("document.fonts.ready")
         page.screenshot(path=str(raw), full_page=False)
         browser.close()

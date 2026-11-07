@@ -1,0 +1,19 @@
+# Propone actualizaciones como pull requests, una vez por mes y agrupadas,
+# para revisar antes de aceptar. Nada se actualiza solo.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      python:
+        patterns: ["*"]
