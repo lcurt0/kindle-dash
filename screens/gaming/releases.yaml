@@ -1,0 +1,15 @@
+# ─────────────────────────────────────────────────────────────
+#  Lanzamientos clave · lista curada a mano
+#  Las fechas pasadas desaparecen solas. Se muestran las 3 próximas.
+#  price es opcional; si lo dejás vacío no se muestra.
+# ─────────────────────────────────────────────────────────────
+
+- date: 2026-11-19
+  name: Grand Theft Auto VI
+  platforms: [PS5]
+  price: ""
+
+# - date: 2026-12-04
+#   name: Otro juego
+#   platforms: [PS5, Switch 2, Steam]
+#   price: "49,99 €"

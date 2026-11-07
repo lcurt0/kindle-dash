@@ -1,0 +1,31 @@
+# ─────────────────────────────────────────────────────────────
+#  Kindle Dash · configuración general
+#  El Kindle siempre descarga la misma URL (dash.png).
+#  Este archivo decide QUÉ pantalla se dibuja en cada momento.
+# ─────────────────────────────────────────────────────────────
+
+timezone: Europe/Madrid
+
+# Resolución del Kindle Paperwhite 7ª gen (vertical).
+width: 1072
+height: 1448
+
+# Pantalla que se muestra cuando ninguna regla coincide.
+default_screen: gaming
+
+# Reglas de rotación, se evalúan de arriba a abajo y gana la primera.
+#   days:  lun, mar, mie, jue, vie, sab, dom
+#   hours: [desde, hasta)  en hora local
+# Ejemplo para cuando exista la pantalla semanal personal:
+#
+# rotation:
+#   - screen: semanal
+#     days: [lun]
+#     hours: [7, 13]
+rotation: []
+
+# Ubicación para el tiempo (la comparten todas las pantallas).
+location:
+  name: Córdoba
+  lat: 37.8882
+  lon: -4.7794

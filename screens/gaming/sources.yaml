@@ -1,0 +1,48 @@
+# ─────────────────────────────────────────────────────────────
+#  Pantalla GAMING · lo que podés editar sin tocar código
+# ─────────────────────────────────────────────────────────────
+
+# Juegos que seguís. Cada uno toma la noticia más reciente que
+# mencione alguna de sus palabras clave (sin importar mayúsculas).
+follow:
+  - label: GTA VI
+    keywords: ["GTA 6", "GTA VI", "Grand Theft Auto VI", "GTA6"]
+  - label: Overwatch
+    keywords: ["Overwatch"]
+
+# Cuántas noticias mostrar en total. Si tus juegos no tienen
+# novedades, se completa con titulares generales ("Mercado").
+news_count: 3
+
+# Ignorar noticias más viejas que esto.
+news_max_age_days: 7
+
+# Palabras que descartan una noticia (para ruido tipo guías).
+news_exclude: ["guía", "trucos", "códigos", "dónde encontrar", "cómo conseguir"]
+
+# Medios. Si alguno deja de funcionar, se ignora y sigue con el resto.
+feeds:
+  - name: Vandal
+    url: https://vandal.elespanol.com/xml.cgi
+  - name: 3DJuegos
+    url: https://www.3djuegos.com/feedburner.xml
+  - name: VidaExtra
+    url: https://www.vidaextra.com/feedburner.xml
+
+# ── Ofertas ──────────────────────────────────────────────────
+# Wishlist por ID de Steam (el número de la URL de la tienda:
+# store.steampowered.com/app/1145360/ → 1145360).
+wishlist: []
+#  - 1145360   # Hades
+#  - 1817070   # Marvel's Spider-Man Remastered
+
+# Opcional: tu SteamID64 si tu wishlist de Steam es pública.
+# Se suma a la lista de arriba automáticamente.
+steam_id: ""
+
+# Si nada de tu wishlist está en oferta, mostrar la mejor
+# oferta destacada de Steam con al menos este descuento.
+fallback_min_discount: 50
+
+# ── Gratis ───────────────────────────────────────────────────
+free_platforms: ["epic-games-store", "gog"]

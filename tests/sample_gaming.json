@@ -1,0 +1,19 @@
+{
+  "kicker": "Lo justo · gaming",
+  "weather": {"temp": 19, "desc": "despejado", "max": 22, "min": 9},
+  "news": [
+    {"label": "GTA VI", "source": "Vandal", "title": "Rockstar publica el último tráiler antes del lanzamiento y detalla el contenido de la edición estándar."},
+    {"label": "Overwatch", "source": "3DJuegos", "title": "La nueva temporada trae un héroe de apoyo y cambios en el modo competitivo."},
+    {"label": "Mercado", "source": "VidaExtra", "title": "Valve anuncia nuevas funciones de Steam Deck para juegos en la nube."}
+  ],
+  "releases": [
+    {"day": "19", "mon": "NOV", "name": "Grand Theft Auto VI", "meta": "PS5", "left": "en 12 días"},
+    {"day": "04", "mon": "DIC", "name": "Juego de ejemplo B", "meta": "PS5 · Switch 2 · Steam · 49,99 €", "left": "en 27 días"},
+    {"day": "11", "mon": "DIC", "name": "Juego de ejemplo C", "meta": "Mac · Steam Deck · 29,99 €", "left": "en 34 días"}
+  ],
+  "deal": {"heading": "De tu wishlist", "name": "Juego de tu wishlist", "meta": "Steam", "discount": 60, "final": "15,99€", "initial": "39,99€"},
+  "free": [
+    {"store": "Epic", "titles": ["Juego gratis A", "Juego gratis B"]},
+    {"store": "GOG", "titles": ["Juego gratis C"]}
+  ]
+}

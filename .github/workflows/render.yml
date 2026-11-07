@@ -1,0 +1,87 @@
+name: Render dashboard
+
+on:
+  # Cada 30 min de 05:00 a 22:30 UTC = 06:00–23:30 en Madrid (invierno)
+  # y 07:00–00:30 (verano). De noche no se renderiza: el Kindle duerme.
+  schedule:
+    - cron: "0,30 5-22 * * *"
+  workflow_dispatch:      # botón "Run workflow" para forzar una actualización
+  push:
+    branches: [main]
+
+permissions:
+  contents: write         # solo para el commit de keepalive
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.render.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Dependencias
+        run: pip install -r requirements.txt
+
+      - name: Caché del navegador de render
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('requirements.txt') }}
+
+      - name: Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Tests
+        run: python -m pytest -q tests
+
+      - name: Render
+        id: render
+        run: |
+          set +e
+          python build.py
+          code=$?
+          if [ $code -eq 0 ]; then echo "publish=true" >> "$GITHUB_OUTPUT"; fi
+          # 3 = sin datos de red: no es un error, simplemente no se publica.
+          [ $code -eq 0 ] || [ $code -eq 3 ]
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.render.outputs.publish == 'true'
+        with:
+          path: out
+
+      # GitHub apaga los workflows programados de repos sin actividad
+      # durante 60 días. Un commit mínimo cada ~45 días lo evita.
+      - name: Keepalive
+        run: |
+          last=$(git log -1 --format=%ct)
+          if [ $(( $(date +%s) - last )) -gt $(( 45 * 86400 )) ]; then
+            date -u +%FT%TZ > .keepalive
+            git config user.name "kindle-dash-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .keepalive
+            git commit -m "keepalive [skip ci]"
+            git push
+          fi
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

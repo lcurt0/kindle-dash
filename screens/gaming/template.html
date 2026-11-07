@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block style %}
+  .news li { list-style:none; display:grid; grid-template-columns:180px 1fr; gap:20px; padding:10px 0; }
+  .news li + li { border-top:2px solid var(--soft); }
+  .tag { font-size:22px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding-top:6px; }
+  .tag small { display:block; font-size:18px; font-weight:500; letter-spacing:.04em; color:var(--mid); text-transform:none; margin-top:4px; }
+  .news p { font-size:30px; line-height:1.24; font-weight:500;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+  .rel li { list-style:none; display:grid; grid-template-columns:120px 1fr auto; gap:24px; align-items:baseline; padding:7px 0; }
+  .rel .day { font-size:52px; font-weight:700; letter-spacing:-.02em; line-height:1; }
+  .rel .day small { display:block; font-family:"Inter"; font-size:20px; font-weight:600; letter-spacing:.12em; color:var(--mid); }
+  .rel .name { font-size:34px; font-weight:600; }
+  .rel .meta { font-size:22px; color:var(--mid); margin-top:4px; font-weight:500; }
+  .rel .left { font-size:24px; font-weight:700; white-space:nowrap; }
+
+  .deal { display:grid; grid-template-columns:1fr auto; gap:24px; align-items:center; }
+  .deal .name { font-size:36px; font-weight:700; line-height:1.15;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .deal .meta { font-size:24px; color:var(--mid); margin-top:8px; }
+  .price { text-align:right; }
+  .price .now { font-size:72px; font-weight:700; letter-spacing:-.03em; line-height:1; white-space:nowrap; }
+  .price .was { font-size:24px; color:var(--mid); text-decoration:line-through; }
+  .badge { display:inline-block; background:var(--ink); color:var(--paper); font-size:24px; font-weight:700; padding:4px 12px; margin-left:8px; }
+  .free { margin-top:22px; padding-top:18px; border-top:2px solid var(--soft); font-size:27px; line-height:1.35;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .free b { font-weight:700; letter-spacing:.04em; margin-right:10px; }
+{% endblock %}
+
+{% block content %}
+  <section class="news">
+    <h2>Tus juegos</h2>
+    {% if news %}
+    <ul>
+      {% for n in news %}
+      <li><span class="tag">{{ n.label }}<small>{{ n.source }}</small></span><p>{{ n.title }}</p></li>
+      {% endfor %}
+    </ul>
+    {% else %}<div class="empty">Sin novedades por ahora.</div>{% endif %}
+  </section>
+
+  <section class="rel">
+    <h2>Próximos lanzamientos</h2>
+    {% if releases %}
+    <ul>
+      {% for r in releases %}
+      <li>
+        <div class="day display">{{ r.day }}<small>{{ r.mon }}</small></div>
+        <div><div class="name">{{ r.name }}</div><div class="meta">{{ r.meta }}</div></div>
+        <div class="left">{{ r.left }}</div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}<div class="empty">Agregá fechas en releases.yaml.</div>{% endif %}
+  </section>
+
+  <section>
+    <h2>{{ deal.heading if deal else "La oferta de la semana" }}</h2>
+    {% if deal %}
+    <div class="deal">
+      <div>
+        <div class="name">{{ deal.name }}</div>
+        <div class="meta">{{ deal.meta }}<span class="badge">−{{ deal.discount }}%</span></div>
+      </div>
+      <div class="price"><div class="now display">{{ deal.final }}</div><div class="was">{{ deal.initial }}</div></div>
+    </div>
+    {% else %}<div class="empty">Sin ofertas para mostrar ahora.</div>{% endif %}
+    {% if free %}
+    <div class="free"><b>GRATIS</b>{% for f in free %}{{ f.store }}: {{ f.titles|join(", ") }}{% if not loop.last %} &nbsp;·&nbsp; {% endif %}{% endfor %}</div>
+    {% endif %}
+  </section>
+{% endblock %}
