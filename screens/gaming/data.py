@@ -210,7 +210,7 @@ def parse_free(items: list[dict], per_store: int = 2) -> list[dict]:
 def free(src: dict) -> list[dict]:
     plats = ".".join(src.get("free_platforms", ["epic-games-store", "gog"]))
     items = safe("gamerpower", lambda: get_json(
-        "https://www.gamerpower.com/api/giveaways", platform=plats, type="game"), [])
+        "https://www.gamerpower.com/api/filter", platform=plats, type="game"), [])
     # GamerPower responde un objeto (no lista) cuando no hay resultados.
     return parse_free(items if isinstance(items, list) else [])
 
