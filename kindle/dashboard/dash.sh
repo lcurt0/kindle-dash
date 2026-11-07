@@ -8,12 +8,15 @@
 #  - avisa en pantalla cuando la batería baja de LOW_BATTERY
 #  - un clic al botón de encendido prende la luz y descarga la imagen más
 #    reciente; de noche, al apagarse la luz vuelve la pantalla de noche
+#  - se autoactualiza desde GitHub (update.sh) con copia de respaldo
 # Se lanza con start.sh. Para salir: KUAL → Detener, o mantener el botón
 # de encendido ~30 s (reinicia normal).
 DEBUG=${DEBUG:-false}
 [ "$DEBUG" = true ] && set -x
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
+. "$DIR/local/env.sh"
+RESUMED=${1:-}   # "resumed" cuando se reinicia a sí mismo tras una actualización
 DASH_PNG="$DIR/dash.png"
 LOG="$DIR/logs/dash.log"
 FULL_DISPLAY_REFRESH_RATE=${FULL_DISPLAY_REFRESH_RATE:-4}
@@ -119,11 +122,15 @@ rtc_sleep() {
   [ "$remaining" -gt 0 ] && sleep "$remaining"
 }
 
-log "Iniciando (min $WAKE_MINUTES, de $WAKE_FROM a $WAKE_TO h, pid $$)"
-sleep 3   # deja que KUAL termine de cerrar su menú
-log "Apagando interfaz"
-stop_ui
-log "Interfaz apagada"
+if [ "$RESUMED" = resumed ]; then
+  log "Reiniciado con la versión $(cat "$DIR/version.txt" 2>/dev/null)"
+else
+  log "Iniciando (min $WAKE_MINUTES, de $WAKE_FROM a $WAKE_TO h, pid $$)"
+  sleep 3   # deja que KUAL termine de cerrar su menú
+  log "Apagando interfaz"
+  stop_ui
+  log "Interfaz apagada"
+fi
 echo powersave >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
 FRONTLIGHT=${FRONTLIGHT:-0}
@@ -140,9 +147,17 @@ while true; do
     draw "$DIR/sleeping.png"
     current_png="$DIR/sleeping.png"
     num_refresh=$FULL_DISPLAY_REFRESH_RATE
+  elif [ "$RESUMED" = resumed ]; then
+    RESUMED=""          # recién actualizado: la pantalla ya está al día
   else
     refresh_dashboard
     current_png="$DASH_PNG"
+    # Una vez por despertar programado: ¿hay scripts nuevos en GitHub?
+    /bin/sh "$DIR/update.sh"
+    if [ $? -eq 10 ]; then
+      log "Scripts actualizados; reiniciando el dashboard"
+      exec /bin/sh "$DIR/dash.sh" resumed
+    fi
   fi
   sleep 10   # margen antes de suspender
   log "Durmiendo ${next}s"

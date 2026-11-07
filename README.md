@@ -43,6 +43,12 @@ No hace falta descargar nada más: todo lo que corre en el Kindle está en `kind
 reciente. De noche, al apagarse la luz, vuelve la pantalla de "Fuera de horario". Para forzar contenido nuevo: *Actions → Render dashboard →
 Run workflow*, esperá un minuto y hacé clic en el Kindle.
 
+**Autoactualización:** en cada despertar programado el Kindle compara su versión
+con la publicada y, si cambió, baja los scripts nuevos, los verifica y se reinicia
+solo. Si una versión sale mal: reiniciá con el botón (40 s) y KUAL →
+**Restaurar versión anterior**. Esa versión no se vuelve a instalar hasta que se
+publique otra.
+
 Horario y zona en `dashboard/local/env.sh`. Por defecto actualiza a las y cuarto
 de 7:15 a 22:15 y muestra la pantalla de noche de 23:15 a 7:15.
 

@@ -1,9 +1,29 @@
 {
   "items": [
-    {"name": "Lo justo · Dashboard", "items": [
-      {"name": "Iniciar dashboard", "action": "/bin/sh", "params": "/mnt/us/dashboard/start.sh"},
-      {"name": "Probar una descarga", "action": "/bin/sh", "params": "-c '. /mnt/us/dashboard/local/env.sh; mkdir -p /mnt/us/dashboard/logs; /mnt/us/dashboard/local/fetch-dashboard.sh /mnt/us/dashboard/dash.png > /mnt/us/dashboard/logs/prueba.log 2>&1 && eips -f -g /mnt/us/dashboard/dash.png'"},
-      {"name": "Detener y volver al Kindle", "action": "/bin/sh", "params": "/mnt/us/dashboard/stop.sh"}
-    ]}
+    {
+      "name": "Lo justo · Dashboard",
+      "items": [
+        {
+          "name": "Iniciar dashboard",
+          "action": "/bin/sh",
+          "params": "/mnt/us/dashboard/start.sh"
+        },
+        {
+          "name": "Probar una descarga",
+          "action": "/bin/sh",
+          "params": "-c '. /mnt/us/dashboard/local/env.sh; mkdir -p /mnt/us/dashboard/logs; /mnt/us/dashboard/local/fetch-dashboard.sh /mnt/us/dashboard/dash.png > /mnt/us/dashboard/logs/prueba.log 2>&1 && eips -f -g /mnt/us/dashboard/dash.png'"
+        },
+        {
+          "name": "Restaurar versión anterior",
+          "action": "/bin/sh",
+          "params": "/mnt/us/dashboard/restore.sh"
+        },
+        {
+          "name": "Detener y volver al Kindle",
+          "action": "/bin/sh",
+          "params": "/mnt/us/dashboard/stop.sh"
+        }
+      ]
+    }
   ]
 }

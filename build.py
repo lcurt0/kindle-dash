@@ -30,6 +30,32 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger("dash")
 
 
+# Archivos que el Kindle se autoactualiza (debe coincidir con FILES en update.sh).
+KINDLE_FILES = ["dash.sh", "start.sh", "stop.sh", "next-wakeup.sh", "wait-for-wifi.sh",
+                "update.sh", "restore.sh", "sleeping.png", "local/env.sh",
+                "local/fetch-dashboard.sh"]
+
+
+def kindle_version() -> str:
+    """Huella del contenido de los scripts del Kindle: cambia sólo si cambian."""
+    import hashlib
+    h = hashlib.sha256()
+    for f in KINDLE_FILES:
+        h.update(f.encode() + b"\0" + (ROOT / "kindle" / "dashboard" / f).read_bytes())
+    return h.hexdigest()[:12]
+
+
+def publish_kindle(out: Path) -> str:
+    import shutil
+    dst = out / "kindle"
+    for f in KINDLE_FILES:
+        (dst / f).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / "kindle" / "dashboard" / f, dst / f)
+    v = kindle_version()
+    (dst / "version.txt").write_text(v + "\n")
+    return v
+
+
 def pick_screen(cfg: dict, n: dt.datetime) -> str:
     for rule in cfg.get("rotation") or []:
         days = rule.get("days") or DIAS
@@ -63,7 +89,11 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--screen")
     ap.add_argument("--sample", action="store_true")
+    ap.add_argument("--kindle-version", action="store_true", help="imprime la versión de los scripts del Kindle")
     args = ap.parse_args()
+    if args.kindle_version:
+        print(kindle_version())
+        return 0
 
     cfg = yaml.safe_load((ROOT / "config.yaml").read_text(encoding="utf-8"))
     now = now_ctx(cfg["timezone"])
@@ -103,6 +133,7 @@ def main() -> int:
     )
     (OUT / "status.json").write_text(json.dumps(
         {"screen": screen, "generated": now["dt"].isoformat()}, ensure_ascii=False), encoding="utf-8")
+    log.info("Scripts del Kindle publicados, versión %s", publish_kindle(OUT))
     log.info("Listo: %s", OUT / "dash.png")
     return 0
 
