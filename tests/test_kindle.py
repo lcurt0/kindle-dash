@@ -59,3 +59,12 @@ def test_next_wakeup_math():
         out = subprocess.run(["sh", str(KDIR / "next-wakeup.sh")], env={**env, "NOW": now},
                              capture_output=True, text=True).stdout.strip()
         assert int(out) == expected, f"{now}: {out} != {expected}"
+
+
+def test_syncs_before_risky_moments():
+    # /mnt/us es FAT: sin sync, un reinicio brusco (botón 40 s) deja archivos
+    # vacíos o a medio escribir. Pasó en el aparato real el 7/11/2026.
+    dash = (KDIR / "dash.sh").read_text()
+    assert dash.index("sync") < dash.index("echo mem >/sys/power/state")
+    assert "sync" in (KDIR / "local" / "fetch-dashboard.sh").read_text()
+    assert (KDIR / "update.sh").read_text().count("sync") >= 2

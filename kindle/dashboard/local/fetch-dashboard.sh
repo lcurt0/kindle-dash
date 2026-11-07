@@ -8,3 +8,4 @@ curl -fsSL --max-time 60 -o "$tmp" "$DASH_URL"
 code=$?
 [ $code -eq 0 ] && [ -s "$tmp" ] || { echo "Descarga falló (curl $code)"; rm -f "$tmp"; exit 1; }
 mv "$tmp" "$1"
+sync   # la memoria del Kindle es FAT: sin sync, un reinicio brusco deja el archivo vacío

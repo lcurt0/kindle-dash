@@ -31,15 +31,18 @@ El usuario es diseñador de producto; los cambios visuales se cuidan como diseñ
 3. **Todo lo publicado es público** (repo y Pages). Nada personal ni secreto en
    pantallas, configuración o logs. La futura pantalla semanal personal NO puede
    publicarse en una URL abierta: requiere resolver privacidad primero.
-4. **Un cambio en `kindle/dashboard/` llega al aparato solo y lo ejecuta como
+4. **`/mnt/us` es FAT y el usuario reinicia a lo bruto** (botón 40 s): toda
+   escritura importante va seguida de `sync`, y siempre antes de suspender.
+   Sin eso se perdieron logs y `dash.png` quedó en 0 bytes (test lo controla).
+5. **Un cambio en `kindle/dashboard/` llega al aparato solo y lo ejecuta como
    root.** Probar la lógica antes de push (simulación local con servidor y `eips`
    falso) y mantener los scripts compatibles con busybox `sh`.
-5. **Si fallan todas las fuentes, no se publica** (exit 3): el Kindle conserva la
+6. **Si fallan todas las fuentes, no se publica** (exit 3): el Kindle conserva la
    última imagen buena. Cada fuente va envuelta en `safe()`.
-6. **Diseño e‑ink**: negro, blanco y dos grises (`--mid #555`, `--soft #bbb`);
+7. **Diseño e‑ink**: negro, blanco y dos grises (`--mid #555`, `--soft #bbb`);
    sin líneas de 1 px; textos acotados con clamp para que nunca se corte el pie;
    probar el peor caso (titulares y nombres largos).
-7. Dependencias y acciones **fijadas** (versiones exactas / commit SHA).
+8. Dependencias y acciones **fijadas** (versiones exactas / commit SHA).
    Dependabot propone actualizaciones mensuales como PR.
 
 ## Tareas frecuentes

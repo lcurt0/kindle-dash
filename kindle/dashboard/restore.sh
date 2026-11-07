@@ -8,6 +8,7 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 bad=$(cat "$DIR/version.txt" 2>/dev/null)
 cp -R "$DIR/.backup/." "$DIR/"
 echo "$bad" >"$DIR/.skip-version"
+sync
 mkdir -p "$DIR/logs"
 echo "$(date '+%F %T') Restaurada la versión anterior (se omite $bad)" >>"$DIR/logs/dash.log"
 eips 1 1 " Version anterior restaurada "

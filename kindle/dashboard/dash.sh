@@ -91,6 +91,7 @@ rtc_sleep() {
   if [ "$DEBUG" = true ]; then sleep "$remaining"; return; fi
   while [ "$remaining" -gt 30 ]; do
     set_alarm "$remaining"
+    sync   # log e imagen a disco antes de dormir: un reinicio brusco no pierde nada
     t0=$(date +%s)
     echo mem >/sys/power/state
     slept=$(( $(date +%s) - t0 ))

@@ -38,9 +38,12 @@ done
 
 rm -rf "$DIR/.backup"; mkdir -p "$DIR/.backup/local"
 for f in $FILES version.txt; do [ -f "$DIR/$f" ] && cp "$DIR/$f" "$DIR/.backup/$f"; done
+sync   # el respaldo tiene que estar en disco antes de tocar nada
 
 for f in $FILES; do mv -f "$stage/$f" "$DIR/$f"; done
+sync   # grabar los scripts nuevos antes de cambiar la versión
 mv -f "$stage/version.txt" "$DIR/version.txt"
 rm -rf "$stage"
+sync
 echo "Update: $local_v -> $remote"
 exit 10
