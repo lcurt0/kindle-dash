@@ -78,9 +78,10 @@ def test_free_games():
         {"title": "Hogwarts Legacy (Epic Games) Giveaway", "platforms": "PC, Epic Games Store"},
         {"title": "Alien Breed (GOG) Giveaway", "platforms": "PC, GOG"},
         {"title": "Otro (Steam) Giveaway", "platforms": "PC, Steam"},
+        {"title": "GMH - Good Morning Human Giveaways", "platforms": "PC, Epic Games Store"},
     ]
     assert g.parse_free(items) == [
-        {"store": "Epic", "titles": ["Hogwarts Legacy"]},
+        {"store": "Epic", "titles": ["Hogwarts Legacy", "GMH - Good Morning Human"]},
         {"store": "GOG", "titles": ["Alien Breed"]},
     ]
 

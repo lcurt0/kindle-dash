@@ -191,7 +191,7 @@ STORES = {"Epic Games Store": "Epic", "GOG": "GOG"}
 
 def clean_giveaway(title: str) -> str:
     t = re.sub(r"\s*\([^)]*\)", "", title)
-    t = re.sub(r"\s*(Giveaway|Free Download|Free)\s*$", "", t, flags=re.I)
+    t = re.sub(r"\s*(Giveaways?|Free Download|Free)\s*$", "", t, flags=re.I)
     return t.strip(" -–")
 
 

@@ -29,20 +29,21 @@ Vista previa en el navegador: `https://<usuario>.github.io/kindle-dash/`
 Requisitos: jailbreak con WinterBreak + hotfix, KUAL instalado y actualizaciones
 bloqueadas. Guía: https://kindlemodding.org
 
-1. Descargá la última release de [kindle-dash](https://github.com/pascalw/kindle-dash/releases)
-   y descomprimila. Trae los binarios para el Kindle (`xh`, `next-wakeup`).
-2. Copiá encima los archivos de la carpeta `kindle/` de este repo, reemplazando:
-   - `dash.sh` → versión adaptada al Paperwhite 7
-   - `sleeping.png` → pantalla de noche
-   - `local/env.sh`, `local/fetch-dashboard.sh`
-3. Revisá la URL en `local/env.sh` (`DASH_URL`).
-4. Conectá el Kindle por USB y copiá esa carpeta como `dashboard` en la raíz
-   (queda en `/mnt/us/dashboard`). Copiá también `KUAL/kindle-dash` dentro de `extensions/`.
-5. Conectá el Kindle al Wi‑Fi, abrí **KUAL → Kindle Dashboard**.
+No hace falta descargar nada más: todo lo que corre en el Kindle está en `kindle/`.
 
-**Salir del dashboard:** mantené el botón de encendido ~30 s. Reinicia normal.
+1. Conectá el Kindle por USB.
+2. Copiá `kindle/dashboard` a la raíz del Kindle (queda `/mnt/us/dashboard`).
+3. Copiá `kindle/extensions/kindle-dash` dentro de `extensions/` del Kindle.
+4. Expulsá el Kindle, conectalo al Wi‑Fi y abrí **KUAL → Lo justo · Dashboard**:
+   - **Probar una descarga**: baja la imagen una vez y la muestra. Ideal para la primera prueba.
+   - **Iniciar dashboard**: arranca el ciclo despertar → descargar → dormir.
+   - **Detener y volver al Kindle**: vuelve a la interfaz normal.
 
-**Si algo no anda:** conectá por USB y abrí `dashboard/logs/dash.log`.
+Horario y zona en `dashboard/local/env.sh`. Por defecto actualiza a las y cuarto
+de 7:15 a 22:15 y muestra la pantalla de noche de 23:15 a 7:15.
+
+**Si algo no anda:** conectá por USB y mirá `dashboard/logs/dash.log`
+(o `logs/prueba.log` para la descarga de prueba).
 
 ---
 
@@ -61,7 +62,7 @@ Cada cambio que subas a `main` regenera la imagen al momento.
 ## Horarios
 
 - **Servidor:** `.github/workflows/render.yml` → `cron`
-- **Kindle:** `kindle/local/env.sh` → `REFRESH_SCHEDULE`
+- **Kindle:** `kindle/dashboard/local/env.sh` → `WAKE_MINUTES`, `WAKE_FROM`, `WAKE_TO`
 - **Qué pantalla cuándo:** `config.yaml` → `rotation`
 
 ## Agregar una pantalla nueva
@@ -91,4 +92,4 @@ queda vacío; si fallan todas, no se publica y el Kindle mantiene la imagen ante
 
 ---
 
-`kindle/dash.sh` está basado en [pascalw/kindle-dash](https://github.com/pascalw/kindle-dash) (MIT).
+`kindle/dashboard/dash.sh` está basado en [pascalw/kindle-dash](https://github.com/pascalw/kindle-dash) (MIT).
