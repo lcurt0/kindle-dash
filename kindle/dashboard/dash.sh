@@ -77,6 +77,9 @@ log "Iniciando ($WAKE_MINUTES min, $WAKE_FROM–$WAKE_TO h)"
 stop_ui
 echo powersave >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
+# Luz frontal: por powerd y, si no responde, directo al driver.
+lipc-set-prop com.lab126.powerd flIntensity "${FRONTLIGHT:-0}" 2>/dev/null \
+  || for bl in /sys/class/backlight/*/brightness; do echo "${FRONTLIGHT:-0}" >"$bl"; done
 
 while true; do
   next=$("$DIR/next-wakeup.sh")

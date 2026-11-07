@@ -22,5 +22,9 @@ export SLEEP_SCREEN_INTERVAL=3900
 # Cada cuántos refrescos parciales hacer uno completo (limpia restos de e-ink).
 export FULL_DISPLAY_REFRESH_RATE=4
 
+# Luz frontal mientras corre el dashboard (0 = apagada, hasta 24).
+# Es lo que más batería gasta; con luz ambiente no hace falta.
+export FRONTLIGHT=0
+
 # IP para comprobar que hay Wi-Fi después de despertar.
 export WIFI_TEST_IP=1.1.1.1
