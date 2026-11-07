@@ -61,7 +61,7 @@
   <main class="body">{% block content %}{% endblock %}</main>
 
   <footer class="bottom">
-    <span>Actualizado {{ now.weekday_short }} {{ now.hhmm }}</span>
+    <span>Datos de las {{ now.hhmm }} · {{ now.weekday_short }}</span>
     <span>{{ footer_right or "" }}</span>
   </footer>
 </div>
