@@ -6,6 +6,7 @@
 #  - detiene la interfaz con el comando que exista (init.d o upstart)
 #  - programa el despertador con la RTC que exista (mxc_rtc o /sys/class/rtc)
 #  - avisa en pantalla cuando la batería baja de LOW_BATTERY
+#  - un clic al botón de encendido prende la luz unos segundos
 # Se lanza con start.sh. Para salir: KUAL → Detener, o mantener el botón
 # de encendido ~30 s (reinicia normal).
 DEBUG=${DEBUG:-false}
@@ -62,18 +63,52 @@ refresh_dashboard() {
   fi
 }
 
-rtc_sleep() {
-  duration=$1
-  if [ "$DEBUG" = true ]; then sleep "$duration"; return; fi
+light() {
+  lipc-set-prop com.lab126.powerd flIntensity "$1" 2>/dev/null \
+    || for bl in /sys/class/backlight/*/brightness; do echo "$1" >"$bl"; done
+}
+
+set_alarm() {
   if [ -e /sys/devices/platform/mxc_rtc.0/wakeup_enable ]; then
     rtc=/sys/devices/platform/mxc_rtc.0/wakeup_enable
-    [ "$(cat "$rtc")" -eq 0 ] && echo -n "$duration" >"$rtc"
+    [ "$(cat "$rtc")" -eq 0 ] && echo -n "$1" >"$rtc"
   else
     for r in /sys/class/rtc/rtc1/wakealarm /sys/class/rtc/rtc0/wakealarm; do
-      if [ -e "$r" ]; then echo 0 >"$r"; echo "+$duration" >"$r"; log "RTC: $r"; break; fi
+      if [ -e "$r" ]; then echo 0 >"$r"; echo "+$1" >"$r"; break; fi
     done
   fi
-  echo mem >/sys/power/state
+}
+
+# Duerme $1 segundos. Si se despierta antes de tiempo, fue el botón de
+# encendido: prende la luz TAP_LIGHT_SECONDS, la apaga y sigue durmiendo
+# lo que faltaba. Así se puede leer de noche sin gastar batería el resto del tiempo.
+rtc_sleep() {
+  remaining=$1
+  if [ "$DEBUG" = true ]; then sleep "$remaining"; return; fi
+  while [ "$remaining" -gt 30 ]; do
+    set_alarm "$remaining"
+    t0=$(date +%s)
+    echo mem >/sys/power/state
+    slept=$(( $(date +%s) - t0 ))
+
+    if [ "$slept" -lt 2 ]; then
+      # La suspensión no se produjo: esperar despierto para no entrar en bucle.
+      log "Suspensión falló; espero despierto ${remaining}s"
+      sleep "$remaining"; return
+    fi
+
+    if [ "$slept" -lt $((remaining - 60)) ]; then
+      log "Botón: luz ${TAP_LIGHT_SECONDS}s"
+      light "$TAP_LIGHT"
+      eips -g "$current_png"   # por si el sistema dibujó algo encima
+      sleep "$TAP_LIGHT_SECONDS"
+      light "$FRONTLIGHT"
+      remaining=$((remaining - slept - TAP_LIGHT_SECONDS))
+    else
+      remaining=0
+    fi
+  done
+  [ "$remaining" -gt 0 ] && sleep "$remaining"
 }
 
 log "Iniciando (min $WAKE_MINUTES, de $WAKE_FROM a $WAKE_TO h, pid $$)"
@@ -83,9 +118,11 @@ stop_ui
 log "Interfaz apagada"
 echo powersave >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
-# Luz frontal: por powerd y, si no responde, directo al driver.
-lipc-set-prop com.lab126.powerd flIntensity "${FRONTLIGHT:-0}" 2>/dev/null \
-  || for bl in /sys/class/backlight/*/brightness; do echo "${FRONTLIGHT:-0}" >"$bl"; done
+FRONTLIGHT=${FRONTLIGHT:-0}
+TAP_LIGHT=${TAP_LIGHT:-12}
+TAP_LIGHT_SECONDS=${TAP_LIGHT_SECONDS:-20}
+light "$FRONTLIGHT"
+current_png="$DASH_PNG"
 
 while true; do
   next=$(/bin/sh "$DIR/next-wakeup.sh")
@@ -93,11 +130,13 @@ while true; do
   if [ "$next" -gt "$SLEEP_SCREEN_INTERVAL" ]; then
     log "Modo noche"
     draw "$DIR/sleeping.png"
+    current_png="$DIR/sleeping.png"
     num_refresh=$FULL_DISPLAY_REFRESH_RATE
   else
     refresh_dashboard
+    current_png="$DASH_PNG"
   fi
-  sleep 10   # margen para poder detenerlo desde KUAL
+  sleep 10   # margen antes de suspender
   log "Durmiendo ${next}s"
   rtc_sleep "$next"
 done

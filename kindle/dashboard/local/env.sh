@@ -26,5 +26,10 @@ export FULL_DISPLAY_REFRESH_RATE=4
 # Es lo que más batería gasta; con luz ambiente no hace falta.
 export FRONTLIGHT=0
 
+# Un clic al botón de encendido prende la luz a TAP_LIGHT (0–24)
+# durante TAP_LIGHT_SECONDS y después vuelve a FRONTLIGHT.
+export TAP_LIGHT=12
+export TAP_LIGHT_SECONDS=20
+
 # IP para comprobar que hay Wi-Fi después de despertar.
 export WIFI_TEST_IP=1.1.1.1
