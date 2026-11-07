@@ -6,8 +6,8 @@
 #  - detiene la interfaz con el comando que exista (init.d o upstart)
 #  - programa el despertador con la RTC que exista (mxc_rtc o /sys/class/rtc)
 #  - avisa en pantalla cuando la batería baja de LOW_BATTERY
-#  - un clic al botón de encendido prende la luz unos segundos y, de día,
-#    descarga la imagen más reciente
+#  - un clic al botón de encendido prende la luz y descarga la imagen más
+#    reciente; de noche, al apagarse la luz vuelve la pantalla de noche
 # Se lanza con start.sh. Para salir: KUAL → Detener, o mantener el botón
 # de encendido ~30 s (reinicia normal).
 DEBUG=${DEBUG:-false}
@@ -81,7 +81,7 @@ set_alarm() {
 }
 
 # Duerme $1 segundos. Si se despierta antes de tiempo, fue el botón de
-# encendido: prende la luz TAP_LIGHT_SECONDS (y de día actualiza), la apaga
+# encendido: prende la luz TAP_LIGHT_SECONDS y actualiza, la apaga
 # y sigue durmiendo lo que faltaba. Así se puede leer de noche sin gastar batería el resto del tiempo.
 rtc_sleep() {
   remaining=$1
@@ -102,14 +102,15 @@ rtc_sleep() {
       log "Botón: luz ${TAP_LIGHT_SECONDS}s"
       light "$TAP_LIGHT"
       t1=$(date +%s)
-      if [ "$current_png" = "$DASH_PNG" ]; then
-        refresh_dashboard      # de día, el clic también trae la imagen más nueva
-      else
-        eips -g "$current_png" # de noche solo luz (y redibuja por si algo quedó encima)
-      fi
+      refresh_dashboard        # el clic siempre trae la imagen más reciente
       busy=$(( $(date +%s) - t1 ))
       [ "$busy" -lt "$TAP_LIGHT_SECONDS" ] && sleep $((TAP_LIGHT_SECONDS - busy))
       light "$FRONTLIGHT"
+      # De noche, al apagarse la luz vuelve la pantalla de "Fuera de horario".
+      if [ "$current_png" != "$DASH_PNG" ]; then
+        num_refresh=$FULL_DISPLAY_REFRESH_RATE
+        draw "$current_png"
+      fi
       remaining=$((remaining - slept - $(date +%s) + t1))
     else
       remaining=0

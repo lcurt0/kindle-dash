@@ -39,8 +39,8 @@ No hace falta descargar nada más: todo lo que corre en el Kindle está en `kind
    - **Iniciar dashboard**: arranca el ciclo despertar → descargar → dormir.
    - **Detener y volver al Kindle**: vuelve a la interfaz normal.
 
-**Un clic al botón de encendido** prende la luz unos segundos y, de día, baja la
-imagen más reciente. Para forzar contenido nuevo: *Actions → Render dashboard →
+**Un clic al botón de encendido** prende la luz unos segundos y baja la imagen más
+reciente. De noche, al apagarse la luz, vuelve la pantalla de "Fuera de horario". Para forzar contenido nuevo: *Actions → Render dashboard →
 Run workflow*, esperá un minuto y hacé clic en el Kindle.
 
 Horario y zona en `dashboard/local/env.sh`. Por defecto actualiza a las y cuarto
