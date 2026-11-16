@@ -2,9 +2,9 @@
   "kicker": "Lo justo · gaming",
   "weather": {"temp": 19, "desc": "despejado", "max": 22, "min": 9},
   "news": [
-    {"label": "GTA VI", "source": "Vandal", "title": "Rockstar publica el último tráiler antes del lanzamiento y detalla el contenido de la edición estándar."},
-    {"label": "Overwatch", "source": "3DJuegos", "title": "La nueva temporada trae un héroe de apoyo y cambios en el modo competitivo."},
-    {"label": "Mercado", "source": "VidaExtra", "title": "Valve anuncia nuevas funciones de Steam Deck para juegos en la nube."}
+    {"label": "GTA VI", "source": "Vandal", "title": "Rockstar publica el último tráiler de GTA VI antes del lanzamiento, confirma el precio de la edición estándar y detalla qué incluye la edición especial para coleccionistas"},
+    {"label": "Overwatch", "source": "3DJuegos", "title": "La nueva temporada de Overwatch trae un héroe de apoyo, un mapa nuevo de escolta y cambios importantes en el modo competitivo"},
+    {"label": "Mercado", "source": "VidaExtra", "title": "Valve anuncia nuevas funciones de Steam Deck para jugar en la nube y mejoras en el modo de suspensión"}
   ],
   "releases": [
     {"day": "19", "mon": "NOV", "name": "Grand Theft Auto VI", "meta": "PS5", "left": "en 12 días"},
