@@ -68,3 +68,55 @@ def test_syncs_before_risky_moments():
     assert dash.index("sync") < dash.index("echo mem >/sys/power/state")
     assert "sync" in (KDIR / "local" / "fetch-dashboard.sh").read_text()
     assert (KDIR / "update.sh").read_text().count("sync") >= 2
+
+
+def _simulate_refresh(tmp_path, online, on_screen):
+    """Corre refresh_dashboard() de dash.sh con eips, ping, curl y lipc falsos."""
+    import os
+    import shutil
+    d = tmp_path / "dashboard"
+    shutil.copytree(KDIR, d)
+    (d / "logs").mkdir(exist_ok=True)
+    (d / "dash.png").write_bytes(b"imagen-vieja")
+    fake = tmp_path / "bin"
+    fake.mkdir()
+    calls = tmp_path / "calls.log"
+    stubs = {
+        "eips": f'echo "eips $*" >>{calls}',
+        "lipc-set-prop": f'echo "lipc $*" >>{calls}',
+        "lipc-get-prop": 'echo NA',
+        "gasgauge-info": 'echo 80',
+        "sleep": 'exit 0',
+        "ping": 'exit 0' if online else 'exit 1',
+        "curl": ('while [ $# -gt 0 ]; do [ "$1" = -o ] && echo nueva >"$2"; shift; done'
+                 if online else 'exit 7'),
+    }
+    for name, body in stubs.items():
+        (fake / name).write_text(f"#!/bin/sh\n{body}\n")
+        (fake / name).chmod(0o755)
+    runner = d / "run-test.sh"
+    runner.write_text(f'DASH_LIB=1 . "$(dirname "$0")/dash.sh"\non_screen="{on_screen}"\n'
+                      'refresh_dashboard\nrefresh_dashboard\n')
+    env = {"PATH": f"{fake}:/usr/bin:/bin", "WIFI_WAIT": "2", "WIFI_RETRY_WAIT": "2"}
+    r = subprocess.run(["sh", str(runner)], env=env, capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0, r.stderr
+    return calls.read_text() if calls.exists() else "", d
+
+
+def test_offline_morning_leaves_night_screen(tmp_path):
+    # Corte de luz: el router se cae y el Kindle despierta de mañana sin red.
+    # Antes quedaba "Fuera de horario" todo el día; ahora vuelve a la última
+    # imagen buena, avisa y reinicia el Wi-Fi.
+    sleeping = str(KDIR / "sleeping.png")
+    calls, d = _simulate_refresh(tmp_path, online=False, on_screen=sleeping)
+    assert f"eips -f -g {d}/dash.png" in calls          # última imagen buena
+    assert calls.count("-g ") == 1                       # se redibuja una sola vez
+    assert "Sin conexion desde" in calls
+    assert "lipc com.lab126.wifid enable 1" in calls     # intentó recuperar el Wi-Fi
+    assert (d / "dash.png").read_bytes() == b"imagen-vieja"
+
+
+def test_online_refresh_draws_new_image(tmp_path):
+    calls, d = _simulate_refresh(tmp_path, online=True, on_screen="")
+    assert (d / "dash.png").read_text().strip() == "nueva"
+    assert "Sin conexion" not in calls and "wifid" not in calls

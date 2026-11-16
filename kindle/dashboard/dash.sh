@@ -23,6 +23,10 @@ FULL_DISPLAY_REFRESH_RATE=${FULL_DISPLAY_REFRESH_RATE:-4}
 SLEEP_SCREEN_INTERVAL=${SLEEP_SCREEN_INTERVAL:-3900}
 LOW_BATTERY=${LOW_BATTERY:-15}
 num_refresh=$FULL_DISPLAY_REFRESH_RATE   # el primer dibujo siempre es completo
+WIFI_WAIT=${WIFI_WAIT:-30}               # segundos esperando el Wi-Fi al despertar
+WIFI_RETRY_WAIT=${WIFI_RETRY_WAIT:-60}   # y después de reiniciarlo
+on_screen=""                             # última imagen dibujada
+offline_since=""                         # hora de la primera descarga fallida
 
 log() { echo "$(date '+%F %T') $*"; }
 trap '' HUP
@@ -42,6 +46,7 @@ stop_ui() {
 battery() { gasgauge-info -c 2>/dev/null | tr -dc '0-9'; }
 
 draw() {
+  on_screen="$1"
   if [ "$num_refresh" -ge "$FULL_DISPLAY_REFRESH_RATE" ]; then
     num_refresh=0
     eips -f -g "$1"        # refresco completo: limpia restos de e-ink
@@ -55,15 +60,41 @@ draw() {
   fi
 }
 
+wifi_state() { lipc-get-prop com.lab126.wifid cmState 2>/dev/null; }
+
+# Apaga y prende el Wi-Fi. Con la interfaz de Amazon detenida nadie más lo
+# hace: si el router se cae un rato (corte de luz), el Kindle puede no volver
+# a conectarse solo y quedarse sin red para siempre.
+restart_wifi() {
+  lipc-set-prop com.lab126.wifid enable 0 2>/dev/null \
+    || lipc-set-prop com.lab126.cmd wirelessEnable 0 2>/dev/null
+  sleep 3
+  lipc-set-prop com.lab126.wifid enable 1 2>/dev/null \
+    || lipc-set-prop com.lab126.cmd wirelessEnable 1 2>/dev/null
+}
+
 refresh_dashboard() {
   log "Esperando Wi-Fi"
-  /bin/sh "$DIR/wait-for-wifi.sh" "$WIFI_TEST_IP"
+  if ! /bin/sh "$DIR/wait-for-wifi.sh" "$WIFI_TEST_IP" "$WIFI_WAIT"; then
+    log "Sin Wi-Fi (estado: $(wifi_state)); reinicio el Wi-Fi"
+    restart_wifi
+    /bin/sh "$DIR/wait-for-wifi.sh" "$WIFI_TEST_IP" "$WIFI_RETRY_WAIT"
+  fi
   log "Descargando"
   if /bin/sh "$DIR/local/fetch-dashboard.sh" "$DASH_PNG"; then
     draw "$DASH_PNG"
+    offline_since=""
     log "Pantalla actualizada (batería $(battery)%)"
   else
-    log "No se pudo descargar; queda la imagen anterior"
+    [ -n "$offline_since" ] || offline_since=$(date +%H:%M)
+    log "No se pudo descargar; queda la última imagen buena (sin conexión desde $offline_since)"
+    # Si en pantalla quedó la de noche, volver a la última imagen buena: de día
+    # nunca tiene que verse "Fuera de horario", aunque falte la red.
+    if [ "$on_screen" != "$DASH_PNG" ] && [ -s "$DASH_PNG" ]; then
+      num_refresh=$FULL_DISPLAY_REFRESH_RATE
+      draw "$DASH_PNG"
+    fi
+    eips 1 3 " Sin conexion desde $offline_since "
   fi
 }
 
@@ -122,6 +153,9 @@ rtc_sleep() {
   done
   [ "$remaining" -gt 0 ] && sleep "$remaining"
 }
+
+# Los tests cargan las funciones sin arrancar el bucle (ver tests/test_kindle.py).
+[ "${DASH_LIB:-}" = 1 ] && return 0
 
 if [ "$RESUMED" = resumed ]; then
   log "Reiniciado con la versión $(cat "$DIR/version.txt" 2>/dev/null)"
